@@ -5,6 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <script src="//cdn.bootcdn.net/ajax/libs/ocanvas/2.9.1/ocanvas.js"></script>
   <style>
     * {
       margin: 0;
@@ -15,36 +16,107 @@
       /* background-color: #000; */
     }
     .canvas {
-      height: 100vh;
+      height: 20vh;
       width: 50vw;
-      float: left;
+      /* float: left; */
+    }
+    .canvas::after, .box::after {
+      content: '';
+      display: inline-block;
+      width: 100%;
+      height: 1px;
+      background:red;
+      position: absolute;
+      left: 0;
+      top: 50%;
+    }
+    .box::before {
+      content: '';
+      display: inline-block;
+      height: 100%;
+      width: 1px;
+      background:red;
+      position: absolute;
+      top: 0;
+      left: 50%;
     }
     .box {
-      height: 100vh;
+      height: 20vh;
       width: 50vw;
-      background: linear-gradient(91deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%);;
-      float: left;
+      border: 1px solid #000;
+      position: relative;
+      /* float: left; */
     }
+    /* #ocan{
+      transform: rotate(180deg);
+    } */
   </style>
   <script src="./index.js"></script>
   <script>
+
+    const backgroundText = 'linear-gradient(70deg, rgb(0,0,255) 50%, rgba(0,0,255,0))'
+
     window.onload = () => {
+      const title = document.createElement('p')
       const canvas = document.createElement('canvas')
       const box = document.createElement('div')
+      
 
       canvas.id = 'canvas'
       canvas.className = 'canvas'
       canvas.width = innerWidth / 2
       canvas.height = innerHeight
-
+      title.className = 'title'
       box.className = 'box'
+      
 
-      document.body.appendChild(canvas)
+      const canvasTitle = title.cloneNode()
+      const divTitle = title.cloneNode()
+      const oCanTitle = title.cloneNode()
+      const ocan = canvas.cloneNode()
+      const canvasBox = box.cloneNode()
+
+      ocan.id = 'ocan'
+
+      // css
+      divTitle.innerText = 'div+css'
+      box.style.background = backgroundText
+      document.body.appendChild(divTitle)
       document.body.appendChild(box)
 
+      // 纯canvas
+      canvasTitle.innerText = 'canvas+VanillaJS'
+      let canvasDom = canvasBox.cloneNode()
+      document.body.appendChild(canvasTitle)
+      canvasDom.appendChild(canvas)
+      document.body.appendChild(canvasDom)
+
+  
+
+      // oCanvas框架
+      oCanTitle.innerText = 'canvas+oCanvas'
+      canvasDom = canvasBox.cloneNode()
+      document.body.appendChild(oCanTitle)
+      canvasDom.appendChild(ocan)
+      document.body.appendChild(canvasDom)
+
+      // canvas+VanillaJS
       const ctx = canvas.getContext('2d')
-      ctx.fillStyle = '#000'
+      ctx.fillStyle = getLinearGradient(ctx, {
+        value: backgroundText,
+        x: 0,
+        y: 0,
+        width: canvas.width,
+        height: canvas.height
+      })
       ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      try {
+        // canvas+oCanvas
+        const ocanCanvas = oCanvas.create({canvas: "#ocan", background: backgroundText})
+      } catch(e){
+        console.log(e)
+      }
     }
   </script>
 </head>

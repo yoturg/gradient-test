@@ -17,28 +17,35 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   matchedColor = /((hsl|hsla|rgb|rgba)\(.*?\))/.exec(args);
   while (matchedColor) {
     colorIndex = parenColors.push(matchedColor[1]) - 1;
-    args = `${args.substring(
-      0,
-      matchedColor.index
-    )}###${colorIndex}###${args.substring(
-      matchedColor.index + matchedColor[1].length,
-      args.length
-    )}`;
+    args = `${args.substring(0, matchedColor.index)}###${colorIndex}###${args.substring(matchedColor.index + matchedColor[1].length, args.length)}`;
     matchedColor = /((hsl|hsla|rgb|rgba)\(.*?\))/.exec(args);
   }
   args = args.split(",");
 
   // 获得表示方向
-  posParts = args[0].split(" ");
+  posParts = args[0].trim().split(/\s+/);
 
-  // 如果第一个参数是方向
-  if (~positions.indexOf(posParts[0]) || ~posParts[0].indexOf("deg")) {
+  if (~posParts[0].indexOf("deg")) {
+    // 如果第一个参数是方向
     pos.push(posParts[0]);
+  } else if (posParts.length > 1 && posParts[0] === "to") {
+    // 如果第二个参数是方向
+    for (let i = 1; i < posParts.length; i++) {
+      if (~positions.indexOf(posParts[i])) {
+        pos.push(posParts[i]);
+      } else {
+        start = -1;
+        break;
+      }
+    }
+  } else {
+    start = -1;
   }
-  // 如果第二个参数是方向
-  if (posParts.length > 1 && ~positions.indexOf(posParts[1])) {
-    pos.push(posParts[1]);
+
+  if (start === -1) {
+    return ctx.createLinearGradient();
   }
+
   // 没有设置方向时的默认值
   if (pos.length === 0) {
     pos.push("top");
@@ -47,23 +54,26 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   }
 
   // 基于定位和宽高，获取起点终点的坐标
+  console.log("posParts", posParts);
+  console.log("args", args);
+  console.log("pos", pos);
   if (pos.length === 1) {
-    if (pos[0] === "top") {
+    if (pos[0] === "bottom") {
       sX = x + width / 2;
       sY = y;
       eX = x + width / 2;
       eY = y + height;
-    } else if (pos[0] === "right") {
+    } else if (pos[0] === "left") {
       sX = x + width;
       sY = y + height / 2;
       eX = x;
       eY = y + height / 2;
-    } else if (pos[0] === "bottom") {
+    } else if (pos[0] === "top") {
       sX = x + width / 2;
       sY = y + height;
       eX = x + width / 2;
       eY = y;
-    } else if (pos[0] === "left") {
+    } else if (pos[0] === "right") {
       sX = x;
       sY = y + height / 2;
       eX = x + width;
@@ -79,40 +89,37 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
 
       // 把角度改成弧度
       if (parseFloat(pos) < 0) {
-        alpha =
-          ((parseFloat(pos) +
-            360 * (parseInt(Math.abs(parseFloat(pos)) / 360, 10) + 1)) *
-            pi) /
-          180;
+        alpha = ((parseFloat(pos) + 360 * (parseInt(Math.abs(parseFloat(pos)) / 360, 10) + 1)) * pi) / 180;
       } else {
         alpha = ((parseFloat(pos) % 360) * pi) / 180;
       }
       const a = alpha;
       // 往右上
       if (alpha >= 0 && alpha < pi / 2) {
-        cornerX = x + width;
-        cornerY = y;
-      } else if (alpha >= pi / 2 && alpha < pi) {
-        // 往左上
         cY = centerY;
         centerY = centerX;
         cornerY = x;
         cornerX = cY;
         centerX = y;
+      } else if (alpha >= pi / 2 && alpha < pi) {
+        // 往左上
+        cornerX = x + width;
+        cornerY = y;
       } else if (alpha >= pi && alpha < pi * 1.5) {
         // 往左下
-        cY = centerY;
-        cornerX = centerX;
-        centerX = x;
-        centerY = y + height;
-        cornerY = cY;
-      } else if (alpha >= pi * 1.5 && alpha < pi * 2) {
-        // 往右下
         cY = centerY;
         centerY = x + width;
         cornerY = centerX;
         cornerX = y + height;
         centerX = cY;
+        
+      } else if (alpha >= pi * 1.5 && alpha < pi * 2) {
+        // 往右下
+        cY = centerY;
+        cornerX = centerX;
+        centerX = x;
+        centerY = y + height;
+        cornerY = cY;
       }
 
       console.log(`corner (${cornerX}, ${cornerY})`);
@@ -123,17 +130,12 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
 
       // 对角和中心两个点为长边形成的三角形的tan值
       // const beta = Math.atan(Math.abs(centerY - cornerY) / Math.abs(cornerX - centerX))
-      const beta = Math.atan2(
-        Math.abs(centerY - cornerY),
-        Math.abs(cornerX - centerX)
-      );
+      const beta = Math.atan2(Math.abs(centerY - cornerY), Math.abs(cornerX - centerX));
       console.log("beta", beta);
       console.log("alpha", alpha);
 
       // 对角到中心的长度
-      const cornerDistance = Math.sqrt(
-        Math.pow(centerY - cornerY, 2) + Math.pow(centerX - cornerX, 2)
-      );
+      const cornerDistance = Math.sqrt(Math.pow(centerY - cornerY, 2) + Math.pow(centerX - cornerX, 2));
 
       // 终点到中心的连线长度
       const endDistance = cornerDistance * Math.cos(beta - alpha);
@@ -141,28 +143,30 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
       // 计算起点和终点
       // 右上
       if (a >= 0 && a < pi / 2) {
-        eX = centerX + endDistance * Math.cos(alpha);
-        eY = centerY - endDistance * Math.sin(alpha);
-        sX = centerX * 2 - eX;
-        sY = centerY * 2 - eY;
-      } else if (a >= pi / 2 && a < pi) {
-        // 左上
+        
         eX = centerY - endDistance * Math.cos(pi / 2 - alpha);
         eY = cornerX - endDistance * Math.sin(pi / 2 - alpha);
         sX = centerY * 2 - eX;
         sY = cornerX * 2 - eY;
+      } else if (a >= pi / 2 && a < pi) {
+        // 左上
+        eX = centerX + endDistance * Math.cos(alpha);
+        eY = centerY - endDistance * Math.sin(alpha);
+        sX = centerX * 2 - eX;
+        sY = centerY * 2 - eY;
       } else if (a >= pi && a < pi * 1.5) {
         // 左下
-        eX = cornerX + endDistance * Math.cos(pi - alpha);
-        eY = cornerY + endDistance * Math.sin(pi - alpha);
-        sX = cornerX * 2 - eX;
-        sY = cornerY * 2 - eY;
-      } else if (a >= pi * 1.5 && a < pi * 2) {
-        // 右下
         eX = cornerY - endDistance * Math.cos(pi * 1.5 - alpha);
         eY = centerX - endDistance * Math.sin(pi * 1.5 - alpha);
         sX = cornerY * 2 - eX;
         sY = centerX * 2 - eY;
+        
+      } else if (a >= pi * 1.5 && a < pi * 2) {
+        // 右下
+        eX = cornerX + endDistance * Math.cos(pi - alpha);
+        eY = cornerY + endDistance * Math.sin(pi - alpha);
+        sX = cornerX * 2 - eX;
+        sY = cornerY * 2 - eY;
       }
     }
 
@@ -201,16 +205,8 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   const gradient = ctx.createLinearGradient(sX, sY, eX, eY);
 
   // 设置色标
-  const colorStops = getColorStops(
-    gradient,
-    args.slice(start),
-    parenColors,
-    sX,
-    sY,
-    eX,
-    eY
-  );
-
+  const colorStops = getColorStops(args.slice(start), parenColors, sX, sY, eX, eY);
+  console.log("colorSrops", colorStops);
   // 在渐变对象上添加色标
   for (let s = 0; s < colorStops.length; s++) {
     gradient.addColorStop(colorStops[s].pos / 100, colorStops[s].color);
@@ -220,7 +216,7 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   return gradient;
 }
 
-function getColorStops(gradient, stops, parenColors, sX, sY, eX, eY) {
+function getColorStops(stops, parenColors, sX, sY, eX, eY) {
   let i;
   const l = stops.length;
   let colorStop;
@@ -242,10 +238,7 @@ function getColorStops(gradient, stops, parenColors, sX, sY, eX, eY) {
       colorPos = stopParts[1];
 
       if (~colorPos.indexOf("px")) {
-        colorPos =
-          (parseFloat(colorPos) /
-            Math.sqrt(Math.pow(eX - sX, 2) + Math.pow(eY - sY, 2))) *
-          100;
+        colorPos = (parseFloat(colorPos) / Math.sqrt(Math.pow(eX - sX, 2) + Math.pow(eY - sY, 2))) * 100;
       } else {
         colorPos = parseFloat(colorPos);
       }
