@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -12,34 +13,40 @@
       border: 0;
       padding: 0;
     }
-    body{
+
+    body {
       /* background-color: #000; */
     }
+
     .canvas {
       height: 20vh;
       width: 50vw;
       /* float: left; */
     }
-    .canvas::after, .box::after {
+
+    .canvas::after,
+    .box::after {
       content: '';
       display: inline-block;
       width: 100%;
       height: 1px;
-      background:red;
+      background: red;
       position: absolute;
       left: 0;
       top: 50%;
     }
+
     .box::before {
       content: '';
       display: inline-block;
       height: 100%;
       width: 1px;
-      background:red;
+      background: red;
       position: absolute;
       top: 0;
       left: 50%;
     }
+
     .box {
       height: 20vh;
       width: 50vw;
@@ -47,6 +54,7 @@
       position: relative;
       /* float: left; */
     }
+
     /* #ocan{
       transform: rotate(180deg);
     } */
@@ -54,21 +62,19 @@
   <script src="./index.js"></script>
   <script>
 
-    const backgroundText = 'linear-gradient(70deg, rgb(0,0,255) 50%, rgba(0,0,255,0))'
+    const backgroundText = 'linear-gradient(89deg, rgb(0,0,255) 50%, rgba(0,0,255,0))'
 
     window.onload = () => {
       const title = document.createElement('p')
       const canvas = document.createElement('canvas')
       const box = document.createElement('div')
-      
+
 
       canvas.id = 'canvas'
       canvas.className = 'canvas'
-      canvas.width = innerWidth / 2
-      canvas.height = innerHeight
       title.className = 'title'
       box.className = 'box'
-      
+
 
       const canvasTitle = title.cloneNode()
       const divTitle = title.cloneNode()
@@ -90,8 +96,13 @@
       document.body.appendChild(canvasTitle)
       canvasDom.appendChild(canvas)
       document.body.appendChild(canvasDom)
+      const { width: canvasWidth, height: canvasHeight } = getComputedStyle(canvas)
+      canvas.width = parseFloat(canvasWidth)
+      canvas.height = parseFloat(canvasHeight)
 
-  
+
+
+
 
       // oCanvas框架
       oCanTitle.innerText = 'canvas+oCanvas'
@@ -102,6 +113,7 @@
 
       // canvas+VanillaJS
       const ctx = canvas.getContext('2d')
+      ctx.globalCompositeOperation = 'destination-over'
       ctx.fillStyle = getLinearGradient(ctx, {
         value: backgroundText,
         x: 0,
@@ -113,13 +125,15 @@
 
       try {
         // canvas+oCanvas
-        const ocanCanvas = oCanvas.create({canvas: "#ocan", background: backgroundText})
-      } catch(e){
+        const ocanCanvas = oCanvas.create({ canvas: "#ocan", background: backgroundText })
+      } catch (e) {
         console.log(e)
       }
     }
   </script>
 </head>
+
 <body>
 </body>
+
 </html>
