@@ -1,136 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="//cdn.bootcdn.net/ajax/libs/ocanvas/2.9.1/ocanvas.js"></script>
+    <style>
+      * {
+        margin: 0;
+        border: 0;
+        padding: 0;
+      }
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <script src="//cdn.bootcdn.net/ajax/libs/ocanvas/2.9.1/ocanvas.js"></script>
-  <style>
-    * {
-      margin: 0;
-      border: 0;
-      padding: 0;
-    }
+      body {
+        /* background-color: #000; */
+      }
 
-    body {
-      /* background-color: #000; */
-    }
+      .canvas {
+        height: 20vh;
+        width: 100vw;
+        /* float: left; */
+      }
 
-    .canvas {
-      height: 20vh;
-      width: 100vw;
-      /* float: left; */
-    }
+      .canvas::after,
+      .box::after {
+        content: "";
+        display: inline-block;
+        width: 100%;
+        height: 1px;
+        background: red;
+        position: absolute;
+        left: 0;
+        top: 50%;
+      }
 
-    .canvas::after,
-    .box::after {
-      content: '';
-      display: inline-block;
-      width: 100%;
-      height: 1px;
-      background: red;
-      position: absolute;
-      left: 0;
-      top: 50%;
-    }
+      .box::before {
+        content: "";
+        display: inline-block;
+        height: 100%;
+        width: 1px;
+        background: red;
+        position: absolute;
+        top: 0;
+        left: 50%;
+      }
 
-    .box::before {
-      content: '';
-      display: inline-block;
-      height: 100%;
-      width: 1px;
-      background: red;
-      position: absolute;
-      top: 0;
-      left: 50%;
-    }
+      .box {
+        height: 20vh;
+        width: 100vw;
+        border: 1px solid #000;
+        position: relative;
+        /* float: left; */
+      }
 
-    .box {
-      height: 20vh;
-      width: 100vw;
-      border: 1px solid #000;
-      position: relative;
-      /* float: left; */
-    }
-
-    /* #ocan{
+      /* #ocan{
       transform: rotate(180deg);
     } */
-  </style>
-  <script src="./index.js"></script>
-  <script>
+    </style>
+    <script src="./index.js"></script>
+    <script>
+      const backgroundText = "linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%), linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%), linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%)".split(/(?=linear)/);
+      // const backgroundText = 'linear-gradient(30deg, #3f87a6,rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%)'
 
-    // const backgroundText = 'linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%), linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%), linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%)'
-    const backgroundText = 'linear-gradient(30deg, #3f87a6,rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%)'
+      window.onload = () => {
+        const title = document.createElement("p");
+        const canvas = document.createElement("canvas");
+        const box = document.createElement("div");
 
-    window.onload = () => {
-      const title = document.createElement('p')
-      const canvas = document.createElement('canvas')
-      const box = document.createElement('div')
+        canvas.id = "canvas";
+        canvas.className = "canvas";
+        title.className = "title";
+        box.className = "box";
 
+        const canvasTitle = title.cloneNode();
+        const divTitle = title.cloneNode();
+        const oCanTitle = title.cloneNode();
+        const ocan = canvas.cloneNode();
+        const canvasBox = box.cloneNode();
 
-      canvas.id = 'canvas'
-      canvas.className = 'canvas'
-      title.className = 'title'
-      box.className = 'box'
+        ocan.id = "ocan";
 
+        // css
+        divTitle.innerText = "div+css";
+        box.style.background = backgroundText.join("");
+        document.body.appendChild(divTitle);
+        document.body.appendChild(box);
 
-      const canvasTitle = title.cloneNode()
-      const divTitle = title.cloneNode()
-      const oCanTitle = title.cloneNode()
-      const ocan = canvas.cloneNode()
-      const canvasBox = box.cloneNode()
+        // 纯canvas
+        canvasTitle.innerText = "canvas+VanillaJS";
+        let canvasDom = canvasBox.cloneNode();
+        document.body.appendChild(canvasTitle);
+        canvasDom.appendChild(canvas);
+        document.body.appendChild(canvasDom);
+        const { width: canvasWidth, height: canvasHeight } = getComputedStyle(canvas);
+        canvas.width = parseFloat(canvasWidth);
+        canvas.height = parseFloat(canvasHeight);
 
-      ocan.id = 'ocan'
+        // oCanvas框架
+        oCanTitle.innerText = "canvas+oCanvas";
+        canvasDom = canvasBox.cloneNode();
+        document.body.appendChild(oCanTitle);
+        canvasDom.appendChild(ocan);
+        document.body.appendChild(canvasDom);
 
-      // css
-      divTitle.innerText = 'div+css'
-      box.style.background = backgroundText
-      document.body.appendChild(divTitle)
-      document.body.appendChild(box)
+        // canvas+VanillaJS
+        const ctx = canvas.getContext("2d");
+        ctx.globalCompositeOperation = "destination-over";
+        backgroundText.forEach((v) => {
+          ctx.fillStyle = getLinearGradient(ctx, {
+            value: v,
+            x: 0,
+            y: 0,
+            width: canvas.width,
+            height: canvas.height,
+          });
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
 
-      // 纯canvas
-      canvasTitle.innerText = 'canvas+VanillaJS'
-      let canvasDom = canvasBox.cloneNode()
-      document.body.appendChild(canvasTitle)
-      canvasDom.appendChild(canvas)
-      document.body.appendChild(canvasDom)
-      const { width: canvasWidth, height: canvasHeight } = getComputedStyle(canvas)
-      canvas.width = parseFloat(canvasWidth)
-      canvas.height = parseFloat(canvasHeight)
+        try {
+          // canvas+oCanvas
+          const ocanCanvas = oCanvas.create({ canvas: "#ocan", background: backgroundText.join("") });
+        } catch (e) {
+          console.log(e);
+        }
+      };
+    </script>
+  </head>
 
-      // oCanvas框架
-      oCanTitle.innerText = 'canvas+oCanvas'
-      canvasDom = canvasBox.cloneNode()
-      document.body.appendChild(oCanTitle)
-      canvasDom.appendChild(ocan)
-      document.body.appendChild(canvasDom)
-
-      // canvas+VanillaJS
-      const ctx = canvas.getContext('2d')
-      ctx.globalCompositeOperation = 'destination-over'
-      ctx.fillStyle = getLinearGradient(ctx, {
-        value: backgroundText,
-        x: 0,
-        y: 0,
-        width: canvas.width,
-        height: canvas.height
-      })
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      try {
-        // canvas+oCanvas
-        const ocanCanvas = oCanvas.create({ canvas: "#ocan", background: backgroundText })
-      } catch (e) {
-        console.log(e)
-      }
-    }
-  </script>
-</head>
-
-<body>
-</body>
-
+  <body></body>
 </html>
