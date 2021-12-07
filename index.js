@@ -7,16 +7,13 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   let sY;
   let eX;
   let eY;
-  const positions = ["top", "bottom", "left", "right"];
-  const units = ["deg", "grad", "rad", "turn"];
-  const unitReg = new RegExp(`^(-?\\d+)(${units.join("|")})$`);
-  console.log(unitReg);
   let matchedColor;
   let colorIndex;
   const parenColors = [];
 
   // 获得linear-gradient里面关于颜色的值
   args = /\((.*)\)/.exec(value)[1];
+  console.log('args', args)
   matchedColor = /((hsl|hsla|rgb|rgba)\(.*?\))/.exec(args);
   while (matchedColor) {
     colorIndex = parenColors.push(matchedColor[1]) - 1;
@@ -51,23 +48,20 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   } else if (unit2rad(posParts[0]) !== undefined) {
     // 如果第一个参数是方向
     pos = posParts[0];
-  } else {
-    start = -1;
-  }
-
-  if (start === -1) {
-    return ctx.createLinearGradient();
+  } else if (!isColor(posParts[0]) && !/###\d+###/.test(posParts[0])) {
+    start = -1
   }
 
   // 没有设置方向时的默认值
   if (!pos) {
-    pos = "top";
+    pos = "180deg";
   } else {
     start = 1;
   }
+  console.log('pos', pos)
+  console.log('start', start)
 
   // 基于定位和宽高，获取起点终点的坐标
-
   if (unit2rad(pos) !== undefined) {
     let alpha;
     let cornerX;
@@ -133,25 +127,12 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
     }
     sX = centerX * 2 - eX;
     sY = centerY * 2 - eY;
+  } else {
+    start === -1
+  }
 
-    drawLing(ctx, { sX, sY, eX, eY });
-    console.log(arguments);
-    console.log("posParts", posParts);
-    console.log("args", args);
-    console.log("pos", pos);
-    console.log(`sX=${sX}, sY=${sY}, eX=${eX}, eY=${eY}`);
-    console.log("args", args);
-    console.log("start", start);
-    console.log("parenColor", parenColors);
-    console.log(`corner (${cornerX}, ${cornerY})`);
-    console.log(`center (${centerX}, ${centerY})`);
-    drawArc(ctx, { x: centerX, y: centerY });
-    drawArc(ctx, { x: cornerX, y: cornerY });
-    console.log("beta", beta);
-    console.log("beta-deg", rad2deg(beta));
-    console.log("alpha", alpha);
-    console.log("alpha-deg", rad2deg(alpha));
-    // 起点和终点坐标
+  if (start === -1) {
+    return ctx.createLinearGradient(0,0,0,0);
   }
 
   // 创建渐变对象
@@ -159,7 +140,6 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
 
   // 设置色标
   const colorStops = getColorStops(args.slice(start), parenColors, sX, sY, eX, eY);
-  console.log("colorSrops", colorStops);
   // 在渐变对象上添加色标
   for (let s = 0; s < colorStops.length; s++) {
     gradient.addColorStop(colorStops[s].pos / 100, colorStops[s].color);
@@ -170,44 +150,60 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
 }
 
 function getColorStops(stops, parenColors, sX, sY, eX, eY) {
-  let i;
+  console.log(arguments);
   const l = stops.length;
-  let colorStop;
-  let stopParts;
-  let color;
-  let colorPos;
+
   const colorStops = [];
+  const lastPoin = {};
 
-  for (i = 0; i < l; i++) {
-    colorStop = stops[i].trim();
-
-    if (colorPos >= 100) {
-      break;
-    }
-
+  console.log("stops", stops);
+  for (let i = 0; i < l; i++) {
+    let colorPos;
+    let color;
+    let colorStop = `${stops[i]}`.trim();
     if (~colorStop.indexOf(" ")) {
-      stopParts = colorStop.split(" ");
-      color = stopParts[0];
-      colorPos = stopParts[1];
+      // 处理有带位置的颜色
+      [color, colorPos] = colorStop.split(/\s+/);
 
-      if (~colorPos.indexOf("px")) {
+      // 处理百分比
+      if (~colorStop.indexOf("px")) {
         colorPos = (parseFloat(colorPos) / Math.sqrt(Math.pow(eX - sX, 2) + Math.pow(eY - sY, 2))) * 100;
       } else {
         colorPos = parseFloat(colorPos);
       }
-    } else {
-      color = colorStop;
 
-      if (colorPos === undefined) {
+
+    } else {
+      // 处理没有带位置的颜色
+      color = colorStop;
+      if (i === 0) {
         colorPos = 0;
-      } else {
-        colorPos = colorPos || 0;
-        colorPos += (100 - colorPos) / (l - i);
+        lastPoin.pos = 0;
+        lastPoin.index = i;
+      } else if (i === l - 1) {
+        colorPos = 100;
       }
     }
 
+    // 处理颜色
     if (~color.indexOf("###")) {
       color = parenColors[/###(\d+)###/.exec(color)[1]];
+    }
+
+    // 当遇到一个有带位置的颜色的时候，把前面没有带位置的颜色的位置处理一下
+    if (colorPos !== undefined) {
+      if (i - lastPoin.index > 1) {
+        const startIndex = lastPoin.index + 1;
+        const startPos = lastPoin.pos;
+        const offset = colorStops.length - startIndex;
+        const step = (colorPos - startPos) / (offset + 1);
+
+        for (let x = startIndex; x < colorStops.length; x++) {
+          colorStops[x].pos = (x - startIndex + 1) * step + startPos;
+        }
+      }
+      lastPoin.pos = colorPos;
+      lastPoin.index = i;
     }
 
     colorStops.push({
@@ -215,7 +211,6 @@ function getColorStops(stops, parenColors, sX, sY, eX, eY) {
       color,
     });
   }
-
   return colorStops;
 }
 
@@ -240,6 +235,14 @@ function rad2deg(rad) {
 
 function grad2rad(grad) {
   return ((parseFloat(grad) % 400) * Math.PI) / 200;
+}
+
+function isColor(strColor){
+  var s = new Option().style;
+  s.color = strColor;
+  console.log('strColor', strColor)
+  console.log('s.color', s.color)
+  return !!s.color;
 }
 
 function drawLing(ctx, { sX, sY, eX, eY }) {

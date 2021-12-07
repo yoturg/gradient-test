@@ -20,7 +20,7 @@
 
     .canvas {
       height: 20vh;
-      width: 50vw;
+      width: 100vw;
       /* float: left; */
     }
 
@@ -49,7 +49,7 @@
 
     .box {
       height: 20vh;
-      width: 50vw;
+      width: 100vw;
       border: 1px solid #000;
       position: relative;
       /* float: left; */
@@ -62,7 +62,8 @@
   <script src="./index.js"></script>
   <script>
 
-    const backgroundText = 'linear-gradient(-90.1turn, rgb(0,0,255) 50%, rgba(0,0,255,0))'
+    // const backgroundText = 'linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%), linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%), linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%)'
+    const backgroundText = 'linear-gradient(30deg, #3f87a6,rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%)'
 
     window.onload = () => {
       const title = document.createElement('p')
@@ -99,10 +100,6 @@
       const { width: canvasWidth, height: canvasHeight } = getComputedStyle(canvas)
       canvas.width = parseFloat(canvasWidth)
       canvas.height = parseFloat(canvasHeight)
-
-
-
-
 
       // oCanvas框架
       oCanTitle.innerText = 'canvas+oCanvas'
