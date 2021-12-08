@@ -13,7 +13,7 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
 
   // 获得linear-gradient里面关于颜色的值
   args = /\((.*)\)/.exec(value)[1];
-  console.log('args', args)
+  console.log("args", args);
   matchedColor = /((hsl|hsla|rgb|rgba)\(.*?\))/.exec(args);
   while (matchedColor) {
     colorIndex = parenColors.push(matchedColor[1]) - 1;
@@ -23,8 +23,10 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   args = args.split(",");
 
   // 获得表示方向
+  drawLing(ctx, { sX: x, sY: y, eX: width, eY: height });
+  console.log("Math.atan2(width, height)", rad2deg(Math.atan2(width, height)));
+  console.log("Math.atan2(height, width)", rad2deg(Math.atan2(height, width)));
   posParts = args[0].trim().split(/\s+/);
-
   if (posParts[0] === "to") {
     if (posParts.length === 2 && ~posParts.indexOf("top")) {
       pos = "0deg";
@@ -35,13 +37,15 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
     } else if (posParts.length === 2 && ~posParts.indexOf("left")) {
       pos = "270deg";
     } else if (posParts.length === 3 && ~posParts.indexOf("top") && ~posParts.indexOf("right")) {
-      pos = "45deg";
+      pos = `${Math.atan2(height, width)}rad`;
+      // pos = "26.50390308982085deg";
     } else if (posParts.length === 3 && ~posParts.indexOf("bottom") && ~posParts.indexOf("right")) {
-      pos = "135deg";
+      // pos = (90 + 26.50390308982085) + "deg";
+      pos = `${Math.atan2(width, height) + Math.PI / 2}rad`;
     } else if (posParts.length === 3 && ~posParts.indexOf("bottom") && ~posParts.indexOf("left")) {
-      pos = "225deg";
+      pos = `${Math.atan2(width, height) + Math.PI / 2 + Math.atan2(height, width) * 2}rad`;
     } else if (posParts.length === 3 && ~posParts.indexOf("top") && ~posParts.indexOf("left")) {
-      pos = "315deg";
+      pos = `${2 * Math.PI - Math.atan2(height, width)}rad`;
     } else {
       start = -1;
     }
@@ -49,7 +53,7 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
     // 如果第一个参数是方向
     pos = posParts[0];
   } else if (!isColor(posParts[0]) && !/###\d+###/.test(posParts[0])) {
-    start = -1
+    start = -1;
   }
 
   // 没有设置方向时的默认值
@@ -58,8 +62,9 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   } else {
     start = 1;
   }
+  // console.log("pos", rad2deg(parseFloat(pos)));
   console.log('pos', pos)
-  console.log('start', start)
+  console.log("start", start);
 
   // 基于定位和宽高，获取起点终点的坐标
   if (unit2rad(pos) !== undefined) {
@@ -127,13 +132,17 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
     }
     sX = centerX * 2 - eX;
     sY = centerY * 2 - eY;
+
+
   } else {
-    start === -1
+    start === -1;
   }
 
   if (start === -1) {
-    return ctx.createLinearGradient(0,0,0,0);
+    return ctx.createLinearGradient(0, 0, 0, 0);
   }
+
+  drawLing(ctx, { sX, sY, eX, eY });
 
   // 创建渐变对象
   const gradient = ctx.createLinearGradient(sX, sY, eX, eY);
@@ -144,6 +153,8 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   for (let s = 0; s < colorStops.length; s++) {
     gradient.addColorStop(colorStops[s].pos / 100, colorStops[s].color);
   }
+
+  
 
   // 返回渐变对象
   return gradient;
@@ -171,8 +182,6 @@ function getColorStops(stops, parenColors, sX, sY, eX, eY) {
       } else {
         colorPos = parseFloat(colorPos);
       }
-
-
     } else {
       // 处理没有带位置的颜色
       color = colorStop;
@@ -237,11 +246,11 @@ function grad2rad(grad) {
   return ((parseFloat(grad) % 400) * Math.PI) / 200;
 }
 
-function isColor(strColor){
+function isColor(strColor) {
   var s = new Option().style;
   s.color = strColor;
-  console.log('strColor', strColor)
-  console.log('s.color', s.color)
+  console.log("strColor", strColor);
+  console.log("s.color", s.color);
   return !!s.color;
 }
 

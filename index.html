@@ -18,7 +18,7 @@
       }
 
       .canvas {
-        height: 20vh;
+        height: 50vw;
         width: 100vw;
         /* float: left; */
       }
@@ -47,7 +47,7 @@
       }
 
       .box {
-        height: 20vh;
+        height: 50vw;
         width: 100vw;
         border: 1px solid #000;
         position: relative;
@@ -60,8 +60,10 @@
     </style>
     <script src="./index.js"></script>
     <script>
-      const backgroundText = "linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%), linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%), linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%)".split(/(?=linear)/);
+      // const backgroundText = "linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%), linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%), linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%)".split(/(?=linear)/);
       // const backgroundText = 'linear-gradient(30deg, #3f87a6,rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%)'
+      // const backgroundText = 'linear-gradient(to top right, red, white, blue)'.split(/(?=linear)/)
+      const backgroundText = 'linear-gradient(to bottom left, red, white, blue)'.split(/(?=linear)/)
 
       window.onload = () => {
         const title = document.createElement("p");
@@ -83,7 +85,8 @@
 
         // css
         divTitle.innerText = "div+css";
-        box.style.background = backgroundText.join("");
+        box.style.backgroundImage = backgroundText.join("");
+        // box.style.backgroundSize = '50% 50%'
         document.body.appendChild(divTitle);
         document.body.appendChild(box);
 
@@ -120,7 +123,7 @@
 
         try {
           // canvas+oCanvas
-          const ocanCanvas = oCanvas.create({ canvas: "#ocan", background: backgroundText.join("") });
+          const ocanCanvas = oCanvas.create({ canvas: "#ocan", background: backgroundText[0] });
         } catch (e) {
           console.log(e);
         }
