@@ -13,7 +13,7 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
 
   // 获得linear-gradient里面关于颜色的值
   args = /\((.*)\)/.exec(value)[1];
-  console.log("args", args);
+  // console.log("args", args);
   matchedColor = /((hsl|hsla|rgb|rgba)\(.*?\))/.exec(args);
   while (matchedColor) {
     colorIndex = parenColors.push(matchedColor[1]) - 1;
@@ -23,9 +23,9 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   args = args.split(",");
 
   // 获得表示方向
-  drawLing(ctx, { sX: x, sY: y, eX: width, eY: height });
-  console.log("Math.atan2(width, height)", rad2deg(Math.atan2(width, height)));
-  console.log("Math.atan2(height, width)", rad2deg(Math.atan2(height, width)));
+  // drawLing(ctx, { sX: x, sY: y, eX: x + width, eY: y + height });
+  // console.log("Math.atan2(width, height)", rad2deg(Math.atan2(width, height)));
+  // console.log("Math.atan2(height, width)", rad2deg(Math.atan2(height, width)));
   posParts = args[0].trim().split(/\s+/);
   if (posParts[0] === "to") {
     if (posParts.length === 2 && ~posParts.indexOf("top")) {
@@ -38,9 +38,7 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
       pos = "270deg";
     } else if (posParts.length === 3 && ~posParts.indexOf("top") && ~posParts.indexOf("right")) {
       pos = `${Math.atan2(height, width)}rad`;
-      // pos = "26.50390308982085deg";
     } else if (posParts.length === 3 && ~posParts.indexOf("bottom") && ~posParts.indexOf("right")) {
-      // pos = (90 + 26.50390308982085) + "deg";
       pos = `${Math.atan2(width, height) + Math.PI / 2}rad`;
     } else if (posParts.length === 3 && ~posParts.indexOf("bottom") && ~posParts.indexOf("left")) {
       pos = `${Math.atan2(width, height) + Math.PI / 2 + Math.atan2(height, width) * 2}rad`;
@@ -63,8 +61,8 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
     start = 1;
   }
   // console.log("pos", rad2deg(parseFloat(pos)));
-  console.log('pos', pos)
-  console.log("start", start);
+  // console.log('pos', pos)
+  // console.log("start", start);
 
   // 基于定位和宽高，获取起点终点的坐标
   if (unit2rad(pos) !== undefined) {
@@ -97,7 +95,7 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
       cornerX = x;
       cornerY = y;
     }
-
+    
     // 把角度转化为0～89，也就是0～.5pi
     alpha %= pi / 2;
 
@@ -106,7 +104,7 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
 
     // 对角到中心的长度
     const cornerDistance = Math.sqrt(Math.pow(centerY - cornerY, 2) + Math.pow(centerX - cornerX, 2));
-
+    
     // 计算起点和终点
     if (a >= 0 && a < pi / 2) {
       // 往右上
@@ -123,7 +121,7 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
       // 左下
       const endDistance = cornerDistance * Math.sin(beta + alpha);
       eX = centerX - endDistance * Math.sin(alpha);
-      eY = centerX + endDistance * Math.cos(alpha);
+      eY = centerY + endDistance * Math.cos(alpha);
     } else if (a >= pi * 1.5 && a < pi * 2) {
       // 左上
       const endDistance = cornerDistance * Math.cos(beta - alpha);
@@ -133,7 +131,6 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
     sX = centerX * 2 - eX;
     sY = centerY * 2 - eY;
 
-
   } else {
     start === -1;
   }
@@ -141,8 +138,12 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   if (start === -1) {
     return ctx.createLinearGradient(0, 0, 0, 0);
   }
-
-  drawLing(ctx, { sX, sY, eX, eY });
+  
+  // console.log('sX', sX)
+  // console.log('sY', sY)
+  // console.log('eX', eX)
+  // console.log('eY', eY)
+  // drawLing(ctx, { sX, sY, eX, eY });
 
   // 创建渐变对象
   const gradient = ctx.createLinearGradient(sX, sY, eX, eY);
@@ -161,13 +162,13 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
 }
 
 function getColorStops(stops, parenColors, sX, sY, eX, eY) {
-  console.log(arguments);
+  // console.log(arguments);
   const l = stops.length;
 
   const colorStops = [];
   const lastPoin = {};
 
-  console.log("stops", stops);
+  // console.log("stops", stops);
   for (let i = 0; i < l; i++) {
     let colorPos;
     let color;
@@ -249,8 +250,8 @@ function grad2rad(grad) {
 function isColor(strColor) {
   var s = new Option().style;
   s.color = strColor;
-  console.log("strColor", strColor);
-  console.log("s.color", s.color);
+  // console.log("strColor", strColor);
+  // console.log("s.color", s.color);
   return !!s.color;
 }
 
