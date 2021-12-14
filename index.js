@@ -173,7 +173,7 @@ function getColorStops(stops, parenColors, sX, sY, eX, eY) {
     let colorPos;
     let color;
     let colorStop = `${stops[i]}`.trim();
-    if (~colorStop.indexOf(" ")) {
+    if (~colorStop.indexOf(" ") && colorStop.indexOf(' ') === colorStop.lastIndexOf(' ')) {
       // 处理有带位置的颜色
       [color, colorPos] = colorStop.split(/\s+/);
 
