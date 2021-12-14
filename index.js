@@ -65,71 +65,92 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   // console.log("start", start);
 
   // 基于定位和宽高，获取起点终点的坐标
+  // if (unit2rad(pos) !== undefined) {
+  //   let alpha;
+  //   let cornerX;
+  //   let cornerY;
+  //   const pi = Math.PI;
+  //   let centerX = x + width / 2;
+  //   let centerY = y + height / 2;
+
+  //   // 把角度改成弧度
+  //   alpha = unit2rad(pos);
+  //   alpha = alpha < 0 ? alpha + 2 * pi : alpha;
+
+  //   const a = alpha;
+  //   // 往右上
+  //   if (alpha >= 0 && alpha < pi / 2) {
+  //     cornerX = x + width;
+  //     cornerY = y;
+  //   } else if (alpha >= pi / 2 && alpha < pi) {
+  //     // 往右下
+  //     cornerX = x + width;
+  //     cornerY = y + height;
+  //   } else if (alpha >= pi && alpha < pi * 1.5) {
+  //     // 往左下
+  //     cornerX = x;
+  //     cornerY = y + height;
+  //   } else if (alpha >= pi * 1.5 && alpha < pi * 2) {
+  //     // 往左上
+  //     cornerX = x;
+  //     cornerY = y;
+  //   }
+
+  //   // 把角度转化为0～89，也就是0～.5pi
+  //   alpha %= pi / 2;
+
+  //   // 对角和中心两个点为长边形成的三角形的tan值
+  //   const beta = Math.atan2(Math.abs(centerY - cornerY), Math.abs(cornerX - centerX));
+
+  //   // 对角到中心的长度
+  //   const cornerDistance = Math.sqrt(Math.pow(centerY - cornerY, 2) + Math.pow(centerX - cornerX, 2));
+
+  //   // 计算起点和终点
+  //   if (a >= 0 && a < pi / 2) {
+  //     // 往右上
+  //     // 终点到中心的连线长度
+  //     const endDistance = cornerDistance * Math.sin(beta + alpha);
+  //     eX = centerX + endDistance * Math.sin(alpha);
+  //     eY = centerY - endDistance * Math.cos(alpha);
+  //   } else if (a >= pi / 2 && a < pi) {
+  //     // 往右下
+  //     const endDistance = cornerDistance * Math.cos(beta - alpha);
+  //     eX = centerX + endDistance * Math.cos(alpha);
+  //     eY = centerY + endDistance * Math.sin(alpha);
+  //   } else if (a >= pi && a < pi * 1.5) {
+  //     // 左下
+  //     const endDistance = cornerDistance * Math.sin(beta + alpha);
+  //     eX = centerX - endDistance * Math.sin(alpha);
+  //     eY = centerY + endDistance * Math.cos(alpha);
+  //   } else if (a >= pi * 1.5 && a < pi * 2) {
+  //     // 左上
+  //     const endDistance = cornerDistance * Math.cos(beta - alpha);
+  //     eX = centerX - endDistance * Math.cos(alpha);
+  //     eY = centerY - endDistance * Math.sin(alpha);
+  //   }
+  //   sX = centerX * 2 - eX;
+  //   sY = centerY * 2 - eY;
+
+  // } else {
+  //   start === -1;
+  // }
+
+  // 基于定位和宽高，获取起点终点的坐标
   if (unit2rad(pos) !== undefined) {
-    let alpha;
-    let cornerX;
-    let cornerY;
     const pi = Math.PI;
     let centerX = x + width / 2;
     let centerY = y + height / 2;
 
     // 把角度改成弧度
-    alpha = unit2rad(pos);
+    let alpha = unit2rad(pos);
     alpha = alpha < 0 ? alpha + 2 * pi : alpha;
-
-    const a = alpha;
-    // 往右上
-    if (alpha >= 0 && alpha < pi / 2) {
-      cornerX = x + width;
-      cornerY = y;
-    } else if (alpha >= pi / 2 && alpha < pi) {
-      // 往右下
-      cornerX = x + width;
-      cornerY = y + height;
-    } else if (alpha >= pi && alpha < pi * 1.5) {
-      // 往左下
-      cornerX = x;
-      cornerY = y + height;
-    } else if (alpha >= pi * 1.5 && alpha < pi * 2) {
-      // 往左上
-      cornerX = x;
-      cornerY = y;
-    }
-    
-    // 把角度转化为0～89，也就是0～.5pi
-    alpha %= pi / 2;
-
-    // 对角和中心两个点为长边形成的三角形的tan值
-    const beta = Math.atan2(Math.abs(centerY - cornerY), Math.abs(cornerX - centerX));
-
-    // 对角到中心的长度
-    const cornerDistance = Math.sqrt(Math.pow(centerY - cornerY, 2) + Math.pow(centerX - cornerX, 2));
-    
-    // 计算起点和终点
-    if (a >= 0 && a < pi / 2) {
-      // 往右上
-      // 终点到中心的连线长度
-      const endDistance = cornerDistance * Math.sin(beta + alpha);
-      eX = centerX + endDistance * Math.sin(alpha);
-      eY = centerY - endDistance * Math.cos(alpha);
-    } else if (a >= pi / 2 && a < pi) {
-      // 往右下
-      const endDistance = cornerDistance * Math.cos(beta - alpha);
-      eX = centerX + endDistance * Math.cos(alpha);
-      eY = centerY + endDistance * Math.sin(alpha);
-    } else if (a >= pi && a < pi * 1.5) {
-      // 左下
-      const endDistance = cornerDistance * Math.sin(beta + alpha);
-      eX = centerX - endDistance * Math.sin(alpha);
-      eY = centerY + endDistance * Math.cos(alpha);
-    } else if (a >= pi * 1.5 && a < pi * 2) {
-      // 左上
-      const endDistance = cornerDistance * Math.cos(beta - alpha);
-      eX = centerX - endDistance * Math.cos(alpha);
-      eY = centerY - endDistance * Math.sin(alpha);
-    }
-    sX = centerX * 2 - eX;
-    sY = centerY * 2 - eY;
+    const gradientLineLength = Math.abs(width * Math.sin(alpha)) + Math.abs(height * Math.cos(alpha));
+    let yDiff = (Math.sin(alpha - pi / 2) * gradientLineLength) / 2;
+    let xDiff = (Math.cos(alpha - pi / 2) * gradientLineLength) / 2;
+    sX = centerX - xDiff
+    sY = centerY - yDiff
+    eX = centerX + xDiff
+    eY = centerY + yDiff
 
   } else {
     start === -1;
@@ -138,7 +159,7 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   if (start === -1) {
     return ctx.createLinearGradient(0, 0, 0, 0);
   }
-  
+
   // console.log('sX', sX)
   // console.log('sY', sY)
   // console.log('eX', eX)
@@ -154,8 +175,6 @@ function getLinearGradient(ctx, { value, x = 0, y = 0, width, height }) {
   for (let s = 0; s < colorStops.length; s++) {
     gradient.addColorStop(colorStops[s].pos / 100, colorStops[s].color);
   }
-
-  
 
   // 返回渐变对象
   return gradient;
@@ -173,7 +192,7 @@ function getColorStops(stops, parenColors, sX, sY, eX, eY) {
     let colorPos;
     let color;
     let colorStop = `${stops[i]}`.trim();
-    if (~colorStop.indexOf(" ") && colorStop.indexOf(' ') === colorStop.lastIndexOf(' ')) {
+    if (~colorStop.indexOf(" ") && colorStop.indexOf(" ") === colorStop.lastIndexOf(" ")) {
       // 处理有带位置的颜色
       [color, colorPos] = colorStop.split(/\s+/);
 
